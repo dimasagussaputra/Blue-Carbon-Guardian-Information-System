@@ -1,0 +1,31 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+
+export async function GET() {
+  try {
+    const supabase = await createClient();
+
+    const [tegakanRes, penyulamanRes, kualitasRes] = await Promise.all([
+      supabase
+        .from("tegakan")
+        .select("id, kode_tegakan, spesies, health_status, tinggi_cm, diameter_cm, latitude, longitude, area_monitoring(nama)"),
+      supabase
+        .from("penyulaman")
+        .select("id, tanggal, spesies, jumlah_bibit, jumlah_hidup, survival_rate, status, latitude, longitude"),
+      supabase
+        .from("kualitas_air")
+        .select("id, tanggal, titik_sampling, ph, do_mgl, salinitas_ppt, tss_mgl, suhu_c, latitude, longitude, area_monitoring(nama)"),
+    ]);
+
+    return NextResponse.json({
+      tegakan: tegakanRes.data ?? [],
+      penyulaman: penyulamanRes.data ?? [],
+      kualitas_air: kualitasRes.data ?? [],
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Gagal mengambil data peta" },
+      { status: 500 }
+    );
+  }
+}
