@@ -9,6 +9,7 @@ export async function getDokumenList(
   let query = supabase
     .from("dokumen")
     .select("*", { count: "exact" })
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (kategori) {
@@ -48,30 +49,12 @@ export async function createDokumen(
 export async function deleteDokumen(id: string): Promise<void> {
   const supabase = await createClient();
 
-  const { data: record, error: fetchError } = await supabase
+  const { error } = await supabase
     .from("dokumen")
-    .select("file_path")
-    .eq("id", id)
-    .single();
-
-  if (fetchError) {
-    throw new Error(fetchError.message);
-  }
-
-  const { error: storageError } = await supabase.storage
-    .from("dokumen")
-    .remove([record.file_path]);
-
-  if (storageError && !storageError.message?.includes("not found")) {
-    throw new Error(storageError.message);
-  }
-
-  const { error: deleteError } = await supabase
-    .from("dokumen")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", id);
 
-  if (deleteError) {
-    throw new Error(deleteError.message);
+  if (error) {
+    throw new Error(error.message);
   }
 }

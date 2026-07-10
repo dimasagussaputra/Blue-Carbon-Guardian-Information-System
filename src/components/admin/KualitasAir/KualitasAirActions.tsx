@@ -53,7 +53,7 @@ export default function KualitasAirActions({
   }
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <>
       <button
         type="button"
         onClick={onAdd}
@@ -78,6 +78,6 @@ export default function KualitasAirActions({
         )}
         {excelLoading ? "Mengunduh..." : excelDone ? "Selesai" : "Export Excel"}
       </button>
-    </div>
+    </>
   );
 }

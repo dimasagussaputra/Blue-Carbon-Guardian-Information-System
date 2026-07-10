@@ -30,7 +30,8 @@ export async function getKualitasAirList(
 
   let query = supabase
     .from("kualitas_air")
-    .select("*, area_monitoring(nama)", { count: "exact" });
+    .select("*, area_monitoring(nama)", { count: "exact" })
+    .is("deleted_at", null);
 
   if (search) {
     query = query.or(
@@ -95,6 +96,7 @@ export async function getKualitasAirTrend(
   let query = supabase
     .from("kualitas_air")
     .select("tanggal, ph, do_mgl, salinitas_ppt, tss_mgl, suhu_c")
+    .is("deleted_at", null)
     .order("tanggal", { ascending: true });
 
   if (area_id) query = query.eq("area_id", area_id);
@@ -146,6 +148,7 @@ export async function getKualitasAirComparison(
   let query = supabase
     .from("kualitas_air")
     .select("ph, do_mgl, salinitas_ppt, tss_mgl, suhu_c, area_monitoring(nama)")
+    .is("deleted_at", null)
     .order("tanggal", { ascending: true });
 
   if (start_date) query = query.gte("tanggal", start_date);
@@ -279,7 +282,7 @@ export async function deleteKualitasAir(id: string): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase
     .from("kualitas_air")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", id);
 
   if (error) {
@@ -296,7 +299,8 @@ export async function getAllKualitasAirForExport(
 
   let query = supabase
     .from("kualitas_air")
-    .select("*, area_monitoring(nama)");
+    .select("*, area_monitoring(nama)")
+    .is("deleted_at", null);
 
   if (search) {
     query = query.or(

@@ -21,7 +21,8 @@ export async function getMonitoringList(
 
   let query = supabase
     .from("monitoring")
-    .select("*, tegakan(kode_tegakan)", { count: "exact" });
+    .select("*, tegakan(kode_tegakan)", { count: "exact" })
+    .is("deleted_at", null);
 
   if (tegakan_id) {
     query = query.eq("tegakan_id", tegakan_id);
@@ -72,7 +73,8 @@ export async function getAllMonitoringForExport(
   const supabase = await createClient();
   let query = supabase
     .from("monitoring")
-    .select("*, tegakan(kode_tegakan)");
+    .select("*, tegakan(kode_tegakan)")
+    .is("deleted_at", null);
 
   if (tegakan_id) {
     query = query.eq("tegakan_id", tegakan_id);
@@ -154,7 +156,10 @@ export async function updateMonitoring(
 
 export async function deleteMonitoring(id: string): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.from("monitoring").delete().eq("id", id);
+  const { error } = await supabase
+    .from("monitoring")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id);
 
   if (error) {
     console.error("Error deleting monitoring:", error);
@@ -170,6 +175,7 @@ export async function getGrowthData(
     .from("monitoring")
     .select("tanggal, tinggi_cm, diameter_cm")
     .eq("tegakan_id", tegakan_id)
+    .is("deleted_at", null)
     .order("tanggal", { ascending: true });
 
   return (data ?? []) as { tanggal: string; tinggi_cm: number; diameter_cm: number | null }[];
@@ -183,6 +189,7 @@ export async function getTimeline(
     .from("monitoring")
     .select("*, tegakan(kode_tegakan)")
     .eq("tegakan_id", tegakan_id)
+    .is("deleted_at", null)
     .order("tanggal", { ascending: false });
 
   return ((data ?? []) as Record<string, unknown>[]).map(transformMonitoringRow);

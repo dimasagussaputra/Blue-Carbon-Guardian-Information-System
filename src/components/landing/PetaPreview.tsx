@@ -1,9 +1,18 @@
 "use client";
 
 import React from "react";
-import { Map, CheckCircle } from "lucide-react";
+import { Map, CheckCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import PetaMap from "@/components/shared/PetaMap";
+import dynamic from "next/dynamic";
+
+const PetaMap = dynamic(() => import("@/components/shared/PetaMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center py-20 bg-slate-100 rounded-2xl">
+      <Loader2 className="size-6 animate-spin text-brand-green-medium" />
+    </div>
+  ),
+});
 
 export default function PetaPreview() {
   return (
@@ -68,7 +77,7 @@ export default function PetaPreview() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="lg:col-span-7"
+            className="lg:col-span-7 overflow-hidden"
           >
             <PetaMap compact />
           </motion.div>

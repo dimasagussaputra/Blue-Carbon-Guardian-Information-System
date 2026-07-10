@@ -49,6 +49,7 @@ export interface KualitasAirRecord {
   longitude: number;
   keterangan: string | null;
   created_at: string;
+  deleted_at: string | null;
 }
 
 export interface KualitasAirListParams {
@@ -108,5 +109,6 @@ export function transformKualitasAirRow(
     longitude: Number(raw.longitude),
     keterangan: (raw.keterangan as string) ?? null,
     created_at: raw.created_at as string,
+    deleted_at: (raw.deleted_at as string) ?? null,
   };
 }

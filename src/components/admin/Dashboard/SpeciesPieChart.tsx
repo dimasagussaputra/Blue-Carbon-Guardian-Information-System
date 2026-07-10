@@ -44,7 +44,9 @@ export default function SpeciesPieChart({ data }: SpeciesPieChartProps) {
           <Tooltip
             contentStyle={{
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid var(--border)",
+              background: "var(--card)",
+              color: "var(--card-foreground)",
               boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               fontSize: "13px",
             }}

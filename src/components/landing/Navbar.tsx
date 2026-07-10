@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Menu, X, ShieldAlert, Key } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_ITEMS = [
     { label: "Home", href: "#home" },
@@ -33,6 +32,18 @@ export default function Navbar() {
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
+
+    function handleMobileNav(href: string) {
+        const id = href.replace("#", "");
+        setIsOpen(false);
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) {
+                const top = el.getBoundingClientRect().top + window.scrollY - 80;
+                window.scrollTo({ top, behavior: "smooth" });
+            }
+        }, 100);
+    }
 
     return (
         <header
@@ -113,40 +124,32 @@ export default function Navbar() {
             </div>
 
             {/* Mobile Menu Overlay */}
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="xl:hidden bg-white border-t border-slate-100 shadow-xl overflow-hidden dark:bg-slate-900 dark:border-slate-700"
-                    >
-                        <div className="max-w-7xl mx-auto px-4 py-4 space-y-1.5">
-                            {NAV_ITEMS.map((item) => (
-                                <a
-                                    key={item.label}
-                                    href={item.href}
-                                    onClick={() => setIsOpen(false)}
-                                    className="block px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-brand-accent hover:text-brand-green-dark transition-colors duration-200 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-green-light"
-                                >
-                                    {item.label}
-                                </a>
-                            ))}
-                            <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
-                                <a
-                                    href="/admin/login"
-                                    onClick={() => setIsOpen(false)}
-                                    className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-sm font-bold text-white bg-brand-blue-dark hover:bg-brand-blue-medium shadow-md transition-all duration-200"
-                                >
-                                    <Key className="w-4 h-4" />
-                                    Login
-                                </a>
-                            </div>
+            {isOpen && (
+                <div className="xl:hidden bg-white border-t border-slate-100 shadow-xl overflow-hidden dark:bg-slate-900 dark:border-slate-700">
+                    <div className="max-w-7xl mx-auto px-4 py-4 space-y-1.5">
+                        {NAV_ITEMS.map((item) => (
+                            <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => handleMobileNav(item.href)}
+                                className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-brand-accent hover:text-brand-green-dark transition-colors duration-200 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-green-light"
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                        <div className="pt-4 border-t border-slate-100 dark:border-slate-700">
+                            <a
+                                href="/admin/login"
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg text-sm font-bold text-white bg-brand-blue-dark hover:bg-brand-blue-medium shadow-md transition-all duration-200"
+                            >
+                                <Key className="w-4 h-4" />
+                                Login
+                            </a>
                         </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    </div>
+                </div>
+            )}
         </header>
     );
 }

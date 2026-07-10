@@ -16,7 +16,10 @@ export async function getTegakanList(
     limit = 10,
   } = params;
 
-  let query = supabase.from("tegakan").select("*, area_monitoring(nama)", { count: "exact" });
+  let query = supabase
+    .from("tegakan")
+    .select("*, area_monitoring(nama)", { count: "exact" })
+    .is("deleted_at", null);
 
   if (search) {
     query = query.or(
@@ -72,6 +75,7 @@ export async function generateKodeTegakan(zonaNama: string): Promise<string> {
     .from("tegakan")
     .select("kode_tegakan")
     .ilike("kode_tegakan", `MKG-${kodeZona}-%`)
+    .is("deleted_at", null)
     .order("kode_tegakan", { ascending: false })
     .limit(1);
 
@@ -161,7 +165,10 @@ export async function updateTegakan(
 
 export async function deleteTegakan(id: string): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.from("tegakan").delete().eq("id", id);
+  const { error } = await supabase
+    .from("tegakan")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id);
 
   if (error) {
     console.error("Error deleting tegakan:", error);
@@ -175,7 +182,10 @@ export async function getAllTegakanForExport(
   const supabase = await createClient();
   const { search, status, spesies } = params;
 
-  let query = supabase.from("tegakan").select("*, area_monitoring(nama)");
+  let query = supabase
+    .from("tegakan")
+    .select("*, area_monitoring(nama)")
+    .is("deleted_at", null);
 
   if (search) {
     query = query.or(

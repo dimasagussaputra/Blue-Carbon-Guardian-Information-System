@@ -61,7 +61,6 @@ export default function AdminSidebar({
       }`}>
         <Link
           href="/admin/dashboard"
-          onClick={onCloseMobile}
           className="flex min-w-0 items-center gap-3 overflow-hidden"
         >
           <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-green-medium/20">
@@ -110,7 +109,6 @@ export default function AdminSidebar({
             <Link
               key={item.href}
               href={item.href}
-              onClick={onCloseMobile}
               title={!showLabels ? item.label : undefined}
               className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${active
                 ? "bg-brand-green-medium/20 text-brand-green-light shadow-sm"
@@ -168,7 +166,6 @@ export default function AdminSidebar({
 
         <Link
           href="/"
-          onClick={onCloseMobile}
           title={!showLabels ? "Situs Publik" : undefined}
           className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/60 transition hover:bg-white/5 hover:text-white ${!showLabels ? "justify-center px-2" : ""
             }`}

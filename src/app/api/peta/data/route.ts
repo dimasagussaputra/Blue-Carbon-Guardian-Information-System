@@ -8,13 +8,16 @@ export async function GET() {
     const [tegakanRes, penyulamanRes, kualitasRes] = await Promise.all([
       supabase
         .from("tegakan")
-        .select("id, kode_tegakan, spesies, health_status, tinggi_cm, diameter_cm, latitude, longitude, area_monitoring(nama)"),
+        .select("id, kode_tegakan, spesies, health_status, tinggi_cm, diameter_cm, latitude, longitude, area_monitoring(nama)")
+        .is("deleted_at", null),
       supabase
         .from("penyulaman")
-        .select("id, tanggal, spesies, jumlah_bibit, jumlah_hidup, survival_rate, status, latitude, longitude"),
+        .select("id, tanggal, spesies, jumlah_bibit, jumlah_hidup, status, latitude, longitude")
+        .is("deleted_at", null),
       supabase
         .from("kualitas_air")
-        .select("id, tanggal, titik_sampling, ph, do_mgl, salinitas_ppt, tss_mgl, suhu_c, latitude, longitude, area_monitoring(nama)"),
+        .select("id, tanggal, titik_sampling, ph, do_mgl, salinitas_ppt, tss_mgl, suhu_c, latitude, longitude, area_monitoring(nama)")
+        .is("deleted_at", null),
     ]);
 
     return NextResponse.json({

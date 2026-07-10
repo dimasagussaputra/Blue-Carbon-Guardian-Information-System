@@ -167,7 +167,7 @@ function FormContent({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 px-6 py-5">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Tanggal
@@ -232,7 +232,7 @@ function FormContent({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Latitude

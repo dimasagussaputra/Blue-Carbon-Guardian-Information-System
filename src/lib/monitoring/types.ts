@@ -31,6 +31,7 @@ export interface MonitoringRecord {
   catatan: string | null;
   foto_url: string | null;
   created_at: string;
+  deleted_at: string | null;
 }
 
 export interface MonitoringListParams {
@@ -66,5 +67,6 @@ export function transformMonitoringRow(
     catatan: (raw.catatan as string) ?? null,
     foto_url: (raw.foto_url as string) ?? null,
     created_at: raw.created_at as string,
+    deleted_at: (raw.deleted_at as string) ?? null,
   };
 }

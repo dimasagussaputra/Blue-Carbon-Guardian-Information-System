@@ -266,7 +266,7 @@ export default function MonitoringTable({
           </div>
         ) : data.length === 0 ? (
           <div className="py-16 text-center">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {tegakan_id
                 ? "Belum ada data monitoring untuk tegakan ini."
                 : "Pilih tegakan untuk melihat data monitoring."}
@@ -330,7 +330,7 @@ export default function MonitoringTable({
       </div>
 
       <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 dark:border-slate-700">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {total > 0
             ? `${(page - 1) * limit + 1}-${Math.min(page * limit, total)} dari ${total} data`
             : "0 data"}
@@ -373,7 +373,7 @@ export default function MonitoringTable({
               </div>
               <div>
                 <h3 className="font-semibold text-slate-900 dark:text-slate-100">Hapus Data</h3>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   Data yang dihapus tidak dapat dikembalikan.
                 </p>
               </div>

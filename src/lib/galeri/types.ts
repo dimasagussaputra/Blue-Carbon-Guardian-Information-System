@@ -28,9 +28,13 @@ export interface GaleriRecord {
   public_url: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface GaleriListResponse {
   data: GaleriRecord[];
   total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }

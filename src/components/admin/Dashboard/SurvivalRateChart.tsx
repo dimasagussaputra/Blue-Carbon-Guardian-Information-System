@@ -36,16 +36,16 @@ export default function SurvivalRateChart({ data }: SurvivalRateChartProps) {
               <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
             dataKey="bulan"
-            tick={{ fontSize: 12, fill: "#94a3b8" }}
+            tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
-            axisLine={{ stroke: "#e2e8f0" }}
+            axisLine={{ stroke: "var(--border)" }}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fontSize: 12, fill: "#94a3b8" }}
+            tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
             tickFormatter={(v) => `${v}%`}
@@ -53,7 +53,9 @@ export default function SurvivalRateChart({ data }: SurvivalRateChartProps) {
           <Tooltip
             contentStyle={{
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid var(--border)",
+              background: "var(--card)",
+              color: "var(--card-foreground)",
               boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               fontSize: "13px",
             }}

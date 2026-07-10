@@ -60,6 +60,7 @@ export interface PenyulamanRecord {
   keterangan: string | null;
   area_id: string | null;
   created_at: string;
+  deleted_at: string | null;
 }
 
 export interface PenyulamanListParams {
@@ -124,5 +125,6 @@ export function transformPenyulamanRow(
     keterangan: (raw.keterangan as string) ?? null,
     area_id: (raw.area_id as string) ?? null,
     created_at: raw.created_at as string,
+    deleted_at: (raw.deleted_at as string) ?? null,
   };
 }

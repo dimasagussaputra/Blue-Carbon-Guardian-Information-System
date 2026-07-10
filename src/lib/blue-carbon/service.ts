@@ -71,6 +71,7 @@ export async function getBlueCarbonHistory(
   const { data, count, error } = await supabase
     .from("blue_carbon_calculations")
     .select("*", { count: "exact" })
+    .is("deleted_at", null)
     .order(sortBy, { ascending: sortOrder === "asc" })
     .range(from, to);
 
@@ -108,7 +109,7 @@ export async function deleteBlueCarbonCalculation(
   const supabase = await createClient();
   const { error } = await supabase
     .from("blue_carbon_calculations")
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq("id", id);
 
   if (error) {

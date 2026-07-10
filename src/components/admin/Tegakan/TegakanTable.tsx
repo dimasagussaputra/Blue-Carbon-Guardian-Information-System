@@ -14,6 +14,8 @@ import {
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
+  ChevronLeft,
+  ChevronRight,
   Edit3,
   Trash2,
   Loader2,
@@ -24,6 +26,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { TegakanRecord, TegakanListResponse } from "@/lib/tegakan/types";
+import { formatDate } from "@/lib/utils";
 
 interface TegakanTableProps {
   onEdit: (record: TegakanRecord) => void;
@@ -269,11 +272,11 @@ export default function TegakanTable({ onEdit }: TegakanTableProps) {
             className="w-full rounded-xl border border-slate-200 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-brand-green-medium focus:outline-none focus:ring-2 focus:ring-brand-green-medium/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-600 focus:border-brand-green-medium focus:outline-none focus:ring-2 focus:ring-brand-green-medium/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-600 focus:border-brand-green-medium focus:outline-none focus:ring-2 focus:ring-brand-green-medium/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             <option value="">Semua Status</option>
             <option value="hidup">Hidup</option>
@@ -282,7 +285,7 @@ export default function TegakanTable({ onEdit }: TegakanTableProps) {
           <select
             value={spesiesFilter}
             onChange={(e) => setSpesiesFilter(e.target.value)}
-            className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-600 focus:border-brand-green-medium focus:outline-none focus:ring-2 focus:ring-brand-green-medium/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className="min-w-0 flex-[2] rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-600 focus:border-brand-green-medium focus:outline-none focus:ring-2 focus:ring-brand-green-medium/20 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             <option value="">Semua Spesies</option>
             {SPESIES_OPTIONS.map((s) => (
@@ -294,73 +297,142 @@ export default function TegakanTable({ onEdit }: TegakanTableProps) {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="size-6 animate-spin text-brand-green-medium" />
-          </div>
-        ) : data.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Belum ada data tegakan.
-            </p>
-          </div>
-        ) : (
-          <table className="w-full">
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-slate-100 dark:border-slate-700">
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ${
-                        header.column.getCanSort()
-                          ? "cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200"
-                          : ""
-                      }`}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      <div className="flex items-center gap-1.5">
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="size-6 animate-spin text-brand-green-medium" />
+        </div>
+      ) : data.length === 0 ? (
+        <div className="py-16 text-center">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Belum ada data tegakan.
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id} className="border-b border-slate-100 dark:border-slate-700">
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className={`px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 ${
+                          header.column.getCanSort()
+                            ? "cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200"
+                            : ""
+                        }`}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                          {header.column.getCanSort() && (
+                            <span className="text-slate-300 dark:text-slate-500">
+                              {{
+                                asc: <ChevronUp className="size-3.5" />,
+                                desc: <ChevronDown className="size-3.5" />,
+                              }[header.column.getIsSorted() as string] ?? (
+                                <ChevronsUpDown className="size-3.5" />
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.map((row) => (
+                  <tr
+                    key={row.id}
+                    className="border-b border-slate-50 transition hover:bg-slate-50/50 dark:border-slate-700/50 dark:hover:bg-slate-700/30"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-3 text-sm">
                         {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
+                          cell.column.columnDef.cell,
+                          cell.getContext()
                         )}
-                        {header.column.getCanSort() && (
-                          <span className="text-slate-300 dark:text-slate-500">
-                            {{
-                              asc: <ChevronUp className="size-3.5" />,
-                              desc: <ChevronDown className="size-3.5" />,
-                            }[header.column.getIsSorted() as string] ?? (
-                              <ChevronsUpDown className="size-3.5" />
-                            )}
-                          </span>
-                        )}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr
-                  key={row.id}
-                  className="border-b border-slate-50 transition hover:bg-slate-50/50 dark:border-slate-700/50 dark:hover:bg-slate-700/30"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-sm">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile card view */}
+          <div className="block md:hidden divide-y divide-slate-100 dark:divide-slate-700">
+            {table.getRowModel().rows.map((row) => {
+              const t = row.original;
+              const isHidup = t.health_status === "hidup";
+              return (
+                <div key={t.id} className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                        {t.kode_tegakan}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {t.spesies}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(t)}
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-brand-green-medium dark:hover:bg-slate-700"
+                        aria-label={`Edit ${t.kode_tegakan}`}
+                      >
+                        <Edit3 className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteConfirm(t.id)}
+                        className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                        aria-label={`Hapus ${t.kode_tegakan}`}
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-400">
+                    <div>
+                      <span className="font-medium text-slate-500 dark:text-slate-500">Zona:</span>{" "}
+                      {t.zona || "-"}
+                    </div>
+                    <div>
+                      <span className="font-medium text-slate-500 dark:text-slate-500">Tanggal:</span>{" "}
+                      {t.tanggal ? formatDate(t.tanggal) : "-"}
+                    </div>
+                    <div className="col-span-2 flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          isHidup
+                            ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20"
+                            : "bg-red-50 text-red-700 ring-1 ring-red-600/20"
+                        }`}
+                      >
+                        {isHidup ? "Hidup" : "Mati"}
+                      </span>
+                      {t.latitude && t.longitude && (
+                        <span className="text-[10px] text-slate-400">
+                          {Number(t.latitude).toFixed(4)}, {Number(t.longitude).toFixed(4)}
+                        </span>
                       )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 dark:border-slate-700">
         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -368,25 +440,29 @@ export default function TegakanTable({ onEdit }: TegakanTableProps) {
             ? `${(page - 1) * limit + 1}-${Math.min(page * limit, total)} dari ${total} data`
             : "0 data"}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1 || loading}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+            className="rounded-lg border border-slate-200 p-2 sm:px-3 sm:py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+            aria-label="Halaman sebelumnya"
           >
-            Sebelumnya
+            <ChevronLeft className="size-4 sm:hidden" />
+            <span className="hidden sm:inline">Sebelumnya</span>
           </button>
-          <span className="px-2 text-sm text-slate-600 dark:text-slate-400">
+          <span className="px-1 sm:px-2 text-sm text-slate-600 dark:text-slate-400">
             {page} / {totalPages || 1}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages || loading}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+            className="rounded-lg border border-slate-200 p-2 sm:px-3 sm:py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+            aria-label="Halaman selanjutnya"
           >
-            Selanjutnya
+            <ChevronRight className="size-4 sm:hidden" />
+            <span className="hidden sm:inline">Selanjutnya</span>
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { X, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Trash2, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LABEL_KATEGORI } from "@/lib/galeri/types";
 import type { GaleriRecord, KategoriGaleri } from "@/lib/galeri/types";
@@ -13,6 +13,7 @@ interface GaleriLightboxProps {
   onPrev: () => void;
   onNext: () => void;
   onDelete: (id: string) => void;
+  onEdit: (record: GaleriRecord) => void;
 }
 
 export default function GaleriLightbox({
@@ -22,6 +23,7 @@ export default function GaleriLightbox({
   onPrev,
   onNext,
   onDelete,
+  onEdit,
 }: GaleriLightboxProps) {
   const record = records[currentIndex];
 
@@ -120,14 +122,24 @@ export default function GaleriLightbox({
                   >
                     {LABEL_KATEGORI[record.kategori as KategoriGaleri]}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(record.id)}
-                    className="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:text-slate-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                    title="Hapus foto"
-                  >
-                    <Trash2 className="size-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(record)}
+                      className="rounded-lg p-1.5 text-slate-400 transition hover:bg-brand-green-medium/10 hover:text-brand-green-medium dark:text-slate-500 dark:hover:bg-brand-green-medium/20 dark:hover:text-brand-green-light"
+                      title="Edit foto"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(record.id)}
+                      className="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:text-slate-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                      title="Hapus foto"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {record.judul && (
@@ -152,14 +164,6 @@ export default function GaleriLightbox({
                   </p>
                 )}
 
-                <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">
-                  Diupload{" "}
-                  {new Date(record.created_at).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
               </div>
             </div>
           </div>

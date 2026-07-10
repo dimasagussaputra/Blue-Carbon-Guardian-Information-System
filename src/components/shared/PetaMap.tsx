@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Map, Layers, Maximize2, Loader2 } from "lucide-react";
 
@@ -18,6 +18,19 @@ const MarkerComp = dynamic(
 );
 const Popup = dynamic(
   () => import("react-leaflet").then((m) => m.Popup),
+  { ssr: false }
+);
+const MapInit = dynamic(
+  () => import("react-leaflet").then(({ useMap }) => {
+    function MapInitInner({ mapRef }: { mapRef: { current: any } }) {
+      const map = useMap();
+      useEffect(() => {
+        mapRef.current = map;
+      }, [map, mapRef]);
+      return null;
+    }
+    return MapInitInner;
+  }),
   { ssr: false }
 );
 
@@ -105,6 +118,8 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
     kualitas_air: true,
   });
   const [skippedCount, setSkippedCount] = useState(0);
+  const [layerPanelOpen, setLayerPanelOpen] = useState(true);
+  const mapRef = useRef<any>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -126,7 +141,7 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
         for (const t of json.tegakan ?? []) {
           const lat = Number(t.latitude);
           const lng = Number(t.longitude);
-          if (!lat || !lng) { skip++; continue; }
+          if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) { skip++; continue; }
           const s = (t.health_status ?? "hidup") as string;
           const area = t.area_monitoring as { nama?: string } | null;
           allMarkers.push({
@@ -145,7 +160,7 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
         for (const p of json.penyulaman ?? []) {
           const lat = Number(p.latitude);
           const lng = Number(p.longitude);
-          if (!lat || !lng) { skip++; continue; }
+          if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) { skip++; continue; }
           allMarkers.push({
             id: `pen-${p.id}`,
             lat, lng,
@@ -162,7 +177,7 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
         for (const k of json.kualitas_air ?? []) {
           const lat = Number(k.latitude);
           const lng = Number(k.longitude);
-          if (!lat || !lng) { skip++; continue; }
+          if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) { skip++; continue; }
           const area = k.area_monitoring as { nama?: string } | null;
           allMarkers.push({
             id: `kua-${k.id}`,
@@ -197,9 +212,8 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
     if (visibleMarkers.length === 0 || typeof window === "undefined") return;
     const L = require("leaflet");
     const bounds = L.latLngBounds(visibleMarkers.map((m) => [m.lat, m.lng]));
-    const el = document.querySelector(".leaflet-container") as any;
-    if (el && el._leaflet_map) {
-      el._leaflet_map.fitBounds(bounds, { padding: [50, 50] });
+    if (mapRef.current) {
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [visibleMarkers]);
 
@@ -208,9 +222,8 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
     const timer = setTimeout(() => {
       const L = require("leaflet");
       const bounds = L.latLngBounds(visibleMarkers.map((m) => [m.lat, m.lng]));
-      const el = document.querySelector(".leaflet-container") as any;
-      if (el && el._leaflet_map) {
-        el._leaflet_map.fitBounds(bounds, { padding: [40, 40] });
+      if (mapRef.current) {
+        mapRef.current.fitBounds(bounds, { padding: [40, 40] });
       }
     }, 300);
     return () => clearTimeout(timer);
@@ -235,7 +248,7 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
   const mapHeight = compact ? "h-[400px]" : "h-[calc(100vh-14rem)] min-h-[400px]";
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white ${compact ? "" : ""}`}>
+    <div className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white`} style={{ isolation: "isolate", contain: "paint" }}>
       {loading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-[1px]">
           <div className="flex items-center gap-2.5 rounded-xl bg-white px-4 py-2.5 text-sm font-medium text-slate-600 shadow-lg">
@@ -256,6 +269,7 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapInit mapRef={mapRef} />
 
           {visibleMarkers.map((m) => {
             const color = LAYER_CONFIG[m.layer]?.color ?? "#6b7280";
@@ -356,44 +370,55 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
         </div>
       ) : (
         <>
-          <div className="absolute right-4 top-4 z-[1000] rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-lg backdrop-blur-sm">
-            <div className="mb-3 flex items-center gap-2">
-              <Layers className="size-4 text-slate-500" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Layer</span>
+          {/* Toggle button */}
+          <button
+            type="button"
+            onClick={() => setLayerPanelOpen((v) => !v)}
+            className="absolute right-4 top-4 z-[1000] flex size-9 items-center justify-center rounded-xl border border-slate-200/80 bg-white/95 shadow-lg backdrop-blur-sm transition hover:bg-slate-100"
+            title={layerPanelOpen ? "Sembunyikan panel" : "Tampilkan panel"}
+          >
+            <Layers className="size-4 text-slate-500" />
+          </button>
+
+          {layerPanelOpen && (
+            <div className="absolute right-4 top-16 z-[1000] w-52 rounded-2xl border border-slate-200/80 bg-white/95 p-4 shadow-lg backdrop-blur-sm">
+              <div className="mb-3 flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Layer</span>
+              </div>
+              <div className="space-y-1">
+                {Object.entries(LAYER_CONFIG).map(([key, cfg]) => {
+                  const shown = markers.filter((m) => m.layer === key).length;
+                  return (
+                    <label
+                      key={key}
+                      className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={enabledLayers[key]}
+                        onChange={() => setEnabledLayers((prev) => ({ ...prev, [key]: !prev[key] }))}
+                        className="size-4 rounded border-slate-300 text-brand-green-medium focus:ring-brand-green-medium/30"
+                      />
+                      <span className="inline-block size-3 shrink-0 rounded-full" style={{ backgroundColor: cfg.color }} />
+                      <span>{cfg.label}</span>
+                      <span className="ml-auto text-xs text-slate-400">{shown}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="mt-3 border-t border-slate-100 pt-3">
+                <button
+                  type="button"
+                  onClick={handleZoomAll}
+                  disabled={visibleMarkers.length === 0}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <Maximize2 className="size-3.5" />
+                  Zoom ke Semua Marker
+                </button>
+              </div>
             </div>
-            <div className="space-y-1">
-              {Object.entries(LAYER_CONFIG).map(([key, cfg]) => {
-                const shown = markers.filter((m) => m.layer === key).length;
-                return (
-                  <label
-                    key={key}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={enabledLayers[key]}
-                      onChange={() => setEnabledLayers((prev) => ({ ...prev, [key]: !prev[key] }))}
-                      className="size-4 rounded border-slate-300 text-brand-green-medium focus:ring-brand-green-medium/30"
-                    />
-                    <span className="inline-block size-3 shrink-0 rounded-full" style={{ backgroundColor: cfg.color }} />
-                    <span>{cfg.label}</span>
-                    <span className="ml-auto text-xs text-slate-400">{shown}</span>
-                  </label>
-                );
-              })}
-            </div>
-            <div className="mt-3 border-t border-slate-100 pt-3">
-              <button
-                type="button"
-                onClick={handleZoomAll}
-                disabled={visibleMarkers.length === 0}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <Maximize2 className="size-3.5" />
-                Zoom ke Semua Marker
-              </button>
-            </div>
-          </div>
+          )}
           {visibleMarkers.length > 0 && (
             <div className="absolute bottom-4 left-4 z-[1000] rounded-xl bg-white/90 px-3 py-1.5 text-xs text-slate-500 shadow backdrop-blur-sm">
               {visibleMarkers.length} marker

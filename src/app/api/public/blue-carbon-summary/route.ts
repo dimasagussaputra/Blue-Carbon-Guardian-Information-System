@@ -9,9 +9,10 @@ export async function GET() {
       supabase
         .from("blue_carbon_calculations")
         .select("karbon_kg, co2_ekuivalen, area_ha")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(100),
-      supabase.from("tegakan").select("health_status"),
+      supabase.from("tegakan").select("health_status").is("deleted_at", null),
     ]);
 
     const calculations = calcRes.data ?? [];

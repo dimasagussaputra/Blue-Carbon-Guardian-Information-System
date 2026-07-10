@@ -36,24 +36,26 @@ export default function KualitasAirTrendChart({
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="#e2e8f0"
+            stroke="var(--border)"
             vertical={false}
           />
           <XAxis
             dataKey="bulan"
-            tick={{ fontSize: 12, fill: "#94a3b8" }}
+            tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
-            axisLine={{ stroke: "#e2e8f0" }}
+            axisLine={{ stroke: "var(--border)" }}
           />
           <YAxis
-            tick={{ fontSize: 12, fill: "#94a3b8" }}
+            tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
           />
           <Tooltip
             contentStyle={{
               borderRadius: "12px",
-              border: "1px solid #e2e8f0",
+              border: "1px solid var(--border)",
+              background: "var(--card)",
+              color: "var(--card-foreground)",
               boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
               fontSize: "13px",
             }}

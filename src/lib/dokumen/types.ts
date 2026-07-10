@@ -25,6 +25,7 @@ export interface DokumenRecord {
   public_url: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface DokumenListResponse {

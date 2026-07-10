@@ -9,18 +9,21 @@ export async function GET() {
       supabase
         .from("monitoring")
         .select("tanggal, tinggi_cm, diameter_cm, survia, catatan, tegakan_id, tegakan(kode_tegakan, area_monitoring(nama))")
+        .is("deleted_at", null)
         .gte("tanggal", "2026-01-01")
         .lte("tanggal", "2026-12-31")
         .order("tanggal", { ascending: true }),
       supabase
         .from("kualitas_air")
         .select("tanggal, ph, do_mgl, salinitas_ppt, tss_mgl, suhu_c")
+        .is("deleted_at", null)
         .gte("tanggal", "2026-01-01")
         .lte("tanggal", "2026-12-31")
         .order("tanggal", { ascending: true }),
       supabase
         .from("blue_carbon_calculations")
         .select("co2_ekuivalen, karbon_kg, created_at")
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(10),
     ]);

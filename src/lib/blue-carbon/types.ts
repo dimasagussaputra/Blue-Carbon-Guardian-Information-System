@@ -62,6 +62,7 @@ export interface BlueCarbonRecord {
   nilai_ekonomi_idr: number;
   detail_json: Record<string, unknown> | null;
   created_at: string;
+  deleted_at: string | null;
 }
 
 export interface BlueCarbonListParams {
@@ -97,5 +98,6 @@ export function transformBlueCarbonRow(raw: Record<string, unknown>): BlueCarbon
     nilai_ekonomi_idr: Number(raw.nilai_ekonomi_idr ?? 0),
     detail_json: raw.detail_json as Record<string, unknown> | null,
     created_at: raw.created_at as string,
+    deleted_at: (raw.deleted_at as string) ?? null,
   };
 }

@@ -7,12 +7,12 @@ export async function GET() {
 
     const [tegakanRes, penyulamanCount, samplingCount, blueCarbonRes, monitoringCount, areaCount] =
       await Promise.all([
-        supabase.from("tegakan").select("health_status"),
-        supabase.from("penyulaman").select("*", { count: "exact", head: true }),
-        supabase.from("kualitas_air").select("*", { count: "exact", head: true }),
-        supabase.from("blue_carbon_calculations").select("co2_ekuivalen"),
-        supabase.from("monitoring").select("*", { count: "exact", head: true }),
-        supabase.from("area_monitoring").select("*", { count: "exact", head: true }),
+        supabase.from("tegakan").select("health_status").is("deleted_at", null),
+        supabase.from("penyulaman").select("*", { count: "exact", head: true }).is("deleted_at", null),
+        supabase.from("kualitas_air").select("*", { count: "exact", head: true }).is("deleted_at", null),
+        supabase.from("blue_carbon_calculations").select("co2_ekuivalen").is("deleted_at", null),
+        supabase.from("monitoring").select("*", { count: "exact", head: true }).is("deleted_at", null),
+        supabase.from("area_monitoring").select("*", { count: "exact", head: true }).is("deleted_at", null),
       ]);
 
     const tegakan = tegakanRes.data ?? [];

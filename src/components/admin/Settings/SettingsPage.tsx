@@ -14,9 +14,11 @@ import {
   Eye,
   EyeOff,
   LogOut,
+  History,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { ActivityLog } from "@/components/ui/ActivityLog";
 
 interface Profile {
   id: string;
@@ -349,6 +351,19 @@ export default function SettingsPage() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Activity Log ── */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-5 dark:border-slate-700/80 dark:bg-slate-800">
+        <div className="mb-4 flex items-center gap-2.5">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700">
+            <History className="size-4 text-slate-500 dark:text-slate-400" />
+          </div>
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            Riwayat Aktivitas
+          </h2>
+        </div>
+        <ActivityLog />
       </div>
 
       {/* ── Sesi & Keamanan ── */}

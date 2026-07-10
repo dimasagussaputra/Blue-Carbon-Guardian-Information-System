@@ -108,9 +108,15 @@ export default function Kontak() {
                                     Temukan rute menuju kawasan Ekowisata Mangrove Mangkang Kulon di aplikasi navigasi Anda.
                                 </p>
                                 <div className="pt-2">
-                                    <div className="inline-block px-3 py-1 bg-brand-green-medium/30 rounded-md border border-brand-green-medium text-[10px] font-bold text-brand-green-light">
-                                        GPS: -6.9678° S, 110.3124° E
-                                    </div>
+                                    <a
+                                    href="https://www.google.com/maps/dir/?api=1&destination=-6.9678,110.3124"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-green-medium/30 hover:bg-brand-green-medium/50 rounded-md border border-brand-green-medium text-[10px] font-bold text-brand-green-light transition-colors"
+                                >
+                                    <MapPin className="w-3 h-3" />
+                                    GPS: -6.9678° S, 110.3124° E
+                                </a>
                                 </div>
                             </div>
                         </div>

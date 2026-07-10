@@ -33,6 +33,7 @@ export interface TegakanRecord {
   foto_url: string | null;
   keterangan: string | null;
   created_at: string;
+  deleted_at: string | null;
 }
 
 export interface TegakanListParams {
@@ -73,5 +74,6 @@ export function transformTegakanRow(raw: Record<string, unknown>): TegakanRecord
     foto_url: (raw.foto_url as string) ?? null,
     keterangan: (raw.keterangan as string) ?? null,
     created_at: raw.created_at as string,
+    deleted_at: (raw.deleted_at as string) ?? null,
   };
 }

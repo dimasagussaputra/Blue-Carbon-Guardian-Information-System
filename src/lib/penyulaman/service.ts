@@ -21,7 +21,10 @@ export async function getPenyulamanList(
     limit = 10,
   } = params;
 
-  let query = supabase.from("penyulaman").select("*", { count: "exact" });
+  let query = supabase
+    .from("penyulaman")
+    .select("*", { count: "exact" })
+    .is("deleted_at", null);
 
   if (search) {
     query = query.or(`spesies.ilike.%${search}%,keterangan.ilike.%${search}%`);
@@ -78,7 +81,7 @@ export async function getPenyulamanStats(
   let baseQuery = supabase.from("penyulaman").select(
     "jumlah_bibit, jumlah_hidup, gelombang",
     { count: "exact" }
-  );
+  ).is("deleted_at", null);
 
   if (gelombang) {
     baseQuery = baseQuery.eq("gelombang", Number(gelombang));
@@ -200,7 +203,10 @@ export async function updatePenyulaman(
 
 export async function deletePenyulaman(id: string): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase.from("penyulaman").delete().eq("id", id);
+  const { error } = await supabase
+    .from("penyulaman")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id);
 
   if (error) {
     console.error("Error deleting penyulaman:", error);
@@ -214,7 +220,10 @@ export async function getAllPenyulamanForExport(
   const supabase = await createClient();
   const { search, gelombang, status } = params;
 
-  let query = supabase.from("penyulaman").select("*");
+  let query = supabase
+    .from("penyulaman")
+    .select("*")
+    .is("deleted_at", null);
 
   if (search) {
     query = query.or(`spesies.ilike.%${search}%,keterangan.ilike.%${search}%`);

@@ -1,6 +1,6 @@
 import {
   Activity,
-  DatabaseBackup,
+  Trash2,
   Droplets,
   FileText,
   Images,
@@ -36,11 +36,11 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { label: "Dokumen", href: "/admin/dokumen", icon: FileText },
   { label: "Laporan", href: "/admin/laporan", icon: ClipboardList },
   {
-    label: "Backup & Restore",
-    href: "/admin/backup-restore",
-    icon: DatabaseBackup,
+    label: "Sampah",
+    href: "/admin/sampah",
+    icon: Trash2,
   },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
+  { label: "Pengaturan", href: "/admin/settings", icon: Settings },
 ];
 
 export function isNavItemActive(pathname: string, href: string): boolean {
