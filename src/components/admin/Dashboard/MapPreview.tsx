@@ -83,7 +83,7 @@ export default function MapPreview({ markers }: MapPreviewProps) {
   }
 
   return (
-    <div className="h-[300px] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+    <div className="relative z-0 h-[300px] overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
       <MapContainer
         center={center}
         zoom={15}

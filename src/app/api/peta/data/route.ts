@@ -27,7 +27,7 @@ export async function GET() {
     });
   } catch {
     return NextResponse.json(
-      { error: "Gagal mengambil data peta" },
+      { tegakan: [], penyulaman: [], kualitas_air: [] },
       { status: 500 }
     );
   }

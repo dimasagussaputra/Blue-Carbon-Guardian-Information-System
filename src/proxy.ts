@@ -3,7 +3,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { AUTH_ROUTES, PUBLIC_ADMIN_ROUTES } from "@/lib/auth/constants";
 import { isAdmin } from "@/lib/auth/roles";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isAdminRoute = pathname.startsWith("/admin");

@@ -18,6 +18,7 @@ import {
   LABEL_KATEGORI,
 } from "@/lib/galeri/types";
 import type { GaleriRecord, KategoriGaleri } from "@/lib/galeri/types";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import GaleriLightbox from "./GaleriLightbox";
 import GaleriUpload from "./GaleriUpload";
 import GaleriEditForm from "./GaleriEditForm";
@@ -36,9 +37,10 @@ const kategoriBadgeColor: Record<KategoriGaleri, string> = {
   clean_up: "bg-rose-500",
 };
 
-const LIMIT = 12;
-
 export default function GaleriGrid() {
+  const isMobile = useIsMobile();
+  const pageSize = isMobile ? 4 : 12;
+
   const [records, setRecords] = useState<GaleriRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<KategoriGaleri | "all">("all");
@@ -57,7 +59,7 @@ export default function GaleriGrid() {
       const params = new URLSearchParams();
       if (filter !== "all") params.set("kategori", filter);
       params.set("page", String(page));
-      params.set("limit", String(LIMIT));
+      params.set("limit", String(pageSize));
       const res = await fetch(`/api/galeri?${params.toString()}`);
       const result = await res.json();
       setRecords(result.data || []);
@@ -68,7 +70,7 @@ export default function GaleriGrid() {
     } finally {
       setLoading(false);
     }
-  }, [filter, page]);
+  }, [filter, page, pageSize]);
 
   useEffect(() => {
     fetchData();
@@ -255,31 +257,31 @@ export default function GaleriGrid() {
 
       {/* Pagination */}
       {total > 0 && (
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white px-5 py-3 dark:border-slate-700/80 dark:bg-slate-800">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {(page - 1) * LIMIT + 1}-{Math.min(page * LIMIT, total)} dari {total} foto
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-200/80 bg-white px-4 py-3 dark:border-slate-700/80 dark:bg-slate-800 sm:flex-row sm:justify-between sm:px-5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+            {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)} dari {total} foto
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1 || loading}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50 sm:px-3 sm:text-sm"
             >
-              <ChevronLeft className="size-4" />
-              Sebelumnya
+              <ChevronLeft className="size-3.5 sm:size-4" />
+              <span>Sebelumnya</span>
             </button>
-            <span className="px-2 text-sm text-slate-600 dark:text-slate-400">
+            <span className="px-1.5 text-xs text-slate-600 dark:text-slate-400 sm:px-2 sm:text-sm">
               {page} / {totalPages || 1}
             </span>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages || loading}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50"
+              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/50 sm:px-3 sm:text-sm"
             >
-              Selanjutnya
-              <ChevronRight className="size-4" />
+              <span>Selanjutnya</span>
+              <ChevronRight className="size-3.5 sm:size-4" />
             </button>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
-import { Map, Layers, Maximize2, Loader2 } from "lucide-react";
+import { AlertTriangle, Map, Layers, Maximize2, Loader2, RefreshCw } from "lucide-react";
 
 const MapContainer = dynamic(
   () => import("react-leaflet").then((m) => m.MapContainer),
@@ -119,6 +119,7 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
   });
   const [skippedCount, setSkippedCount] = useState(0);
   const [layerPanelOpen, setLayerPanelOpen] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const mapRef = useRef<any>(null);
 
   useEffect(() => {
@@ -130,6 +131,7 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
 
     async function fetchData() {
       setLoading(true);
+      setError(null);
       try {
         const res = await fetch("/api/peta/data");
         if (!res.ok) throw new Error("Failed to fetch");
@@ -196,8 +198,8 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
 
         setMarkers(allMarkers);
         setSkippedCount(skip);
-      } catch (err) {
-        console.error("Gagal memuat data peta:", err);
+      } catch {
+        setError("Gagal memuat data peta. Periksa koneksi dan coba lagi.");
       } finally {
         setLoading(false);
       }
@@ -205,6 +207,88 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
 
     fetchData();
   }, [mounted]);
+
+  const handleRetry = useCallback(() => {
+    setError(null);
+    setLoading(true);
+    setMarkers([]);
+    setSkippedCount(0);
+
+    const fn = async () => {
+      try {
+        const res = await fetch("/api/peta/data");
+        if (!res.ok) throw new Error("Failed to fetch");
+        const json = await res.json();
+
+        const allMarkers: MapMarker[] = [];
+        let skip = 0;
+
+        for (const t of json.tegakan ?? []) {
+          const lat = Number(t.latitude);
+          const lng = Number(t.longitude);
+          if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) { skip++; continue; }
+          const s = (t.health_status ?? "hidup") as string;
+          const area = t.area_monitoring as { nama?: string } | null;
+          allMarkers.push({
+            id: `teg-${t.id}`,
+            lat, lng,
+            layer: s === "hidup" ? "tegakan_hidup" : "tegakan_mati",
+            kode: t.kode_tegakan ?? "-",
+            spesies: t.spesies ?? "-",
+            status: s,
+            tinggi: t.tinggi_cm != null ? `${t.tinggi_cm} cm` : "-",
+            diameter: t.diameter_cm != null ? `${t.diameter_cm} cm` : "-",
+            zona: area?.nama ?? "-",
+          } as TegakanMarker);
+        }
+
+        for (const p of json.penyulaman ?? []) {
+          const lat = Number(p.latitude);
+          const lng = Number(p.longitude);
+          if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) { skip++; continue; }
+          allMarkers.push({
+            id: `pen-${p.id}`,
+            lat, lng,
+            layer: "penyulaman",
+            tanggal: p.tanggal ?? "-",
+            spesies: p.spesies ?? "-",
+            jumlah_bibit: p.jumlah_bibit ?? 0,
+            jumlah_hidup: p.jumlah_hidup,
+            survival_rate: p.survival_rate,
+            status: p.status ?? "-",
+          } as PenyulamanMarker);
+        }
+
+        for (const k of json.kualitas_air ?? []) {
+          const lat = Number(k.latitude);
+          const lng = Number(k.longitude);
+          if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) { skip++; continue; }
+          const area = k.area_monitoring as { nama?: string } | null;
+          allMarkers.push({
+            id: `kua-${k.id}`,
+            lat, lng,
+            layer: "kualitas_air",
+            tanggal: k.tanggal ?? "-",
+            titik_sampling: k.titik_sampling ?? null,
+            ph: k.ph ?? 0,
+            do_mgl: k.do_mgl ?? 0,
+            salinitas_ppt: k.salinitas_ppt ?? 0,
+            tss_mgl: k.tss_mgl ?? 0,
+            suhu_c: k.suhu_c ?? 0,
+            lokasi: area?.nama ?? "-",
+          } as KualitasAirMarker);
+        }
+
+        setMarkers(allMarkers);
+        setSkippedCount(skip);
+      } catch {
+        setError("Gagal memuat data peta. Periksa koneksi dan coba lagi.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fn();
+  }, []);
 
   const visibleMarkers = markers.filter((m) => enabledLayers[m.layer]);
 
@@ -246,6 +330,27 @@ export default function PetaMap({ compact = false }: PetaMapProps) {
   }
 
   const mapHeight = compact ? "h-[400px]" : "h-[calc(100vh-14rem)] min-h-[400px]";
+
+  if (error) {
+    return (
+      <div className="flex h-[500px] flex-col items-center justify-center gap-4 rounded-2xl border border-slate-200/80 bg-white">
+        <div className="flex size-12 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+          <AlertTriangle className="size-6 text-red-500" />
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{error}</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleRetry}
+          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700/50"
+        >
+          <RefreshCw className="size-4" />
+          Coba Lagi
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white`} style={{ isolation: "isolate", contain: "paint" }}>
